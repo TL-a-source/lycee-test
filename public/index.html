@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Projet Cyber — Démo IP</title>
+<!-- Tailwind via CDN pour prototype rapide -->
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-6">
+<main class="max-w-2xl w-full bg-white shadow-lg rounded-2xl p-8">
+<header class="mb-6">
+<h1 class="text-2xl font-semibold">Démo capture IP</h1>
+<p class="text-sm text-gray-500">Projet local — cliquez sur le bouton pour envoyer une requête au serveur.</p>
+</header>
+
+
+<section class="space-y-4">
+<div class="rounded-lg border p-4">
+<p class="text-gray-700">Cliquez sur le bouton ci-dessous. Le serveur enregistrera l'IP du visiteur ainsi que des métadonnées (user-agent, horodatage).</p>
+</div>
+
+
+<div class="flex gap-4 items-center">
+<button id="sendBtn" class="px-6 py-3 bg-sky-600 text-white rounded-xl shadow hover:bg-sky-700 transition">Envoyer et logger mon IP</button>
+<div id="status" class="text-sm text-gray-600">—</div>
+</div>
+
+
+<details class="mt-4 text-sm text-gray-500">
+<summary class="cursor-pointer">Informations techniques</summary>
+<pre class="mt-2 text-xs bg-gray-100 p-3 rounded">La page envoie une requête POST vers <code>/log</code> sur le serveur local. Le serveur lit l'IP côté serveur (pas côté client) pour éviter la falsification par JS.</pre>
+</details>
+</section>
+</main>
+
+
+<script>
+const btn = document.getElementById('sendBtn');
+const status = document.getElementById('status');
+
+
+btn.addEventListener('click', async () => {
+status.textContent = 'Envoi en cours...';
+try {
+const resp = await fetch('/log', {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({ note: 'clic depuis la page de démonstration' })
+});
+
+
+if (!resp.ok) throw new Error(await resp.text());
+const data = await resp.json();
+status.textContent = `Réussi — id: ${data.id} — horodatage: ${data.timestamp}`;
+} catch (err) {
+console.error(err);
+status.textContent = 'Erreur : voir console';
+}
+});
+</script>
+</body>
+</html>
